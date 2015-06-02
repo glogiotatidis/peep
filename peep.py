@@ -54,7 +54,8 @@ except ImportError:
     from urllib.parse import urlparse  # 3.4
 # TODO: Probably use six to make urllib stuff work across 2/3.
 
-from pkg_resources import require, VersionConflict, DistributionNotFound
+from pkg_resources import get_distribution, require, VersionConflict, DistributionNotFound
+from distutils.version import StrictVersion
 
 # We don't admit our dependency on pip in setup.py, lest a naive user simply
 # say `pip install peep.tar.gz` and thus pull down an untrusted copy of pip
@@ -320,9 +321,13 @@ def package_finder(argv):
     # Carry over PackageFinder kwargs that have [about] the same names as
     # options attr names:
     possible_options = [
-        'find_links', 'use_wheel', 'allow_external', 'allow_unverified',
+        'find_links', 'allow_external', 'allow_unverified',
         'allow_all_external', ('allow_all_prereleases', 'pre'),
         'process_dependency_links']
+    if StrictVersion(get_distribution("pip").version) >= StrictVersion('7.0.0'):
+        possible_options.append('format_control')
+    else:
+        possible_options.append('use_wheel')
     kwargs = {}
     for option in possible_options:
         kw, attr = option if isinstance(option, tuple) else (option, option)
