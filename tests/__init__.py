@@ -380,7 +380,7 @@ class HashParsingTests(ServerTestCase):
                 useless==1.0
                 # sha256:   some_number_######_signs # hi # there
                 # sha256: abcde  # hi
-                useless==1.0""")
+                moreuseless==1.0""")
         eq_(reqs[0]._expected_hashes(),
             ['t9XWiL3TRb-ol3d9KXdWaIzwLhs3QsVoheLlwrmW_4I'])
         eq_(reqs[1]._expected_hashes(),
@@ -391,7 +391,7 @@ class HashParsingTests(ServerTestCase):
         reqs = self.downloaded_reqs("""
             # sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
             useless==1.0
-            useless==1.0""")
+            moreuseless==1.0""")
         eq_(reqs[1].__class__, MissingReq)
 
     def test_non_hash_comments(self):
@@ -403,7 +403,7 @@ class HashParsingTests(ServerTestCase):
             useless==1.0
             # Just some comment
             # sha256: abc
-            useless==1.0""")
+            moreuseless==1.0""")
         eq_(reqs[1]._expected_hashes(), ['abc'])
 
         # None of those bogus lines above MissingThing should have been

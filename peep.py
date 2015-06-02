@@ -117,6 +117,8 @@ ARCHIVE_EXTENSIONS = ('.tar.bz2', '.tar.gz', '.tgz', '.tar', '.zip')
 
 MARKER = object()
 
+FILECACHE = {}
+
 
 class PipException(Exception):
     """When I delegated to pip, it exited with an error."""
@@ -280,6 +282,13 @@ def memoize(func):
     return memoizer
 
 
+def filecache(filename):
+    if filename not in FILECACHE:
+        with open(filename) as fp:
+            FILECACHE[filename] = fp.readlines()
+    return FILECACHE[filename]
+
+
 def package_finder(argv):
     """Return a PackageFinder respecting command-line options.
 
@@ -439,9 +448,13 @@ class DownloadedReq(object):
         InstallRequirement came.
 
         """
-        path, line = (re.match(r'-r (.*) \(line (\d+)\)$',
-                               self._req.comes_from).groups())
-        return path, int(line)
+
+        path = re.match(r'-r (.*?) \(line \d+\)$', self._req.comes_from).groups()[0]
+        for lineno, line in enumerate(filecache(path)):
+            if re.match('{0}[ >=<~!]'.format(self._name()), line.lstrip()):
+                break
+
+        return path, lineno+1
 
     @memoize  # Avoid hitting the file[cache] over and over.
     def _expected_hashes(self):
